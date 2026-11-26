@@ -26,7 +26,7 @@ jobs:
 
       - name: Clone HLSDK
         run: |
-          git clone --depth 1 --branch mobile_hacks \
+          git clone --depth 1 --recurse-submodules --shallow-submodules --branch mobile_hacks \
             https://github.com/FWGS/hlsdk-portable.git hlsdk
 
       - name: Build Android APK
