@@ -15,7 +15,7 @@ fi
 cd "$ENGINE"
 mkdir -p 3rdparty
 [ -d 3rdparty/SDL ] || git clone --depth 1 -b SDL2 https://github.com/libsdl-org/SDL 3rdparty/SDL
-[ -d 3rdparty/hlsdk-portable ] || git clone --depth 1 -b mobile-hacks https://github.com/FWGS/hlsdk-portable 3rdparty/hlsdk-portable
+[ -d 3rdparty/hlsdk-portable ] || git clone --depth 1 -b mobile_hacks https://github.com/FWGS/hlsdk-portable 3rdparty/hlsdk-portable
 
 # our code
 APP_JAVA="android/app/src/main/java"
