@@ -37,6 +37,6 @@ fi
 
 cd android
 chmod +x gradlew
-./gradlew assembleDebug
+./gradlew assembleDebug --stacktrace --info > "$HERE/build.log" 2>&1 || { echo "BUILD FAILED, last lines:"; tail -80 "$HERE/build.log" | cut -c1-300; exit 1; }
 echo
 find . -name "*.apk" -print
