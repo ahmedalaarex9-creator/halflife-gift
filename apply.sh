@@ -17,6 +17,9 @@ mkdir -p 3rdparty
 [ -d 3rdparty/SDL ] || git clone --depth 1 -b SDL2 https://github.com/libsdl-org/SDL 3rdparty/SDL
 [ -d 3rdparty/hlsdk-portable ] || git clone --depth 1 -b mobile_hacks https://github.com/FWGS/hlsdk-portable 3rdparty/hlsdk-portable
 
+# submodules that the engine marks as skipped but the Android build needs
+git submodule update --init --checkout 3rdparty/nanogl 3rdparty/gl-wes-v2 3rdparty/gl4es/gl4es
+
 # our code
 APP_JAVA="android/app/src/main/java"
 mkdir -p "$APP_JAVA/su/xash/engine/gift"
