@@ -1,0 +1,55 @@
+name: Build HLSDK Android Client
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-hlsdk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android SDK and NDK
+        run: |
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses >/dev/null || true
+          "$SDKM" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;26.1.10909125" \
+            "cmake;3.22.1"
+
+      - name: Clone HLSDK
+        run: |
+          git clone --depth 1 --branch mobile_hacks \
+            https://github.com/FWGS/hlsdk-portable.git hlsdk
+
+      - name: Build Android APK
+        working-directory: hlsdk/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace \
+            > ../build-android.log 2>&1 || {
+              tail -100 ../build-android.log
+              exit 1
+            }
+
+      - name: Upload HLSDK APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HLSDK-Android-APK
+          path: hlsdk/android/app/build/outputs/apk/debug/*.apk
+
+      - name: Upload native build outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HLSDK-Native-Build
+          path: |
+            hlsdk/android/app/.cxx/**
+            hlsdk/build-android.log
