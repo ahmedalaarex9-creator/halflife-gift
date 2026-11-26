@@ -2,8 +2,6 @@ name: Build APK
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 jobs:
   build:
@@ -16,12 +14,13 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Android SDK + NDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install NDK and CMake (NDK 28 builds 16KB-aligned libs for newest Android)
+      - name: Install NDK and CMake
         run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.12433566" "cmake;3.22.1"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          ls "$SDKM"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.12433566" "cmake;3.22.1"
 
       - name: Tools
         run: sudo apt-get update && sudo apt-get install -y ninja-build python3
