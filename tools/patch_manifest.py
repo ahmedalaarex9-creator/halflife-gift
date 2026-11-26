@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """Patch the engine's AndroidManifest.xml so GiftLauncherActivity is the launcher.
-
-usage: patch_manifest.py <path/to/AndroidManifest.xml>
-Safe to run twice.
-"""
+Only adds permissions that are not already declared. Safe to run twice."""
 import re
 import sys
 
@@ -14,22 +11,23 @@ if "GiftLauncherActivity" in src:
     print("manifest already patched")
     sys.exit(0)
 
-# 1) permissions
-perms = (
-    '    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>\n'
-    '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n'
-    '    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" '
-    'android:maxSdkVersion="29"/>\n'
-)
-src, n = re.subn(r"(\s*<application)", "\n" + perms + r"\1", src, count=1)
-if n != 1:
-    sys.exit("could not find <application> in manifest")
+wanted = [
+    "android.permission.MANAGE_EXTERNAL_STORAGE",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.WRITE_EXTERNAL_STORAGE",
+]
+add = ""
+for p in wanted:
+    if ('android:name="%s"' % p) not in src:
+        add += '    <uses-permission android:name="%s"/>\n' % p
+if add:
+    src, n = re.subn(r"(\s*<application)", "\n" + add + r"\1", src, count=1)
+    if n != 1:
+        sys.exit("could not find <application> in manifest")
 
-# 2) old launcher categories go away (the engine activity stays, just not as an icon)
 src = re.sub(r'\s*<category android:name="android\.intent\.category\.LAUNCHER"\s*/>', "", src)
 src = re.sub(r'\s*<category android:name="android\.intent\.category\.LEANBACK_LAUNCHER"\s*/>', "", src)
 
-# 3) our activity
 activity = """
         <activity
             android:name="su.xash.engine.gift.GiftLauncherActivity"
@@ -47,6 +45,4 @@ if n != 1:
     sys.exit("could not find </application> in manifest")
 
 open(path, "w", encoding="utf-8").write(src)
-print("manifest patched")
-m = re.findall(r'android:name="([^"]*Activity[^"]*)"', src)
-print("activities now:", m)
+print("manifest patched; added permissions:", add.strip() or "none (already present)")
